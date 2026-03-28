@@ -337,30 +337,20 @@ This repo includes a workflow at:
 - On push to `dev`: auto-deploys to dev server via SSH + Docker Compose
 - On push to `main`: auto-deploys to production server via SSH + Docker Compose
 
-### Required GitHub Secrets
+### Required GitHub Secret
 
-For DEV deploy:
+- `FIREBASE_SERVICE_ACCOUNT_MEENA_BAZAR_ASSOCIATION`
 
-- `DEV_HOST`
-- `DEV_USER`
-- `DEV_SSH_KEY`
-- `DEV_PORT` (optional, defaults to `22`)
-- `DEV_APP_PATH` (absolute path on server where repo is present)
+Create it from Firebase project service account JSON and add it as a repository secret.
 
-For PROD deploy:
+### Deploy behavior
 
-- `PROD_HOST`
-- `PROD_USER`
-- `PROD_SSH_KEY`
-- `PROD_PORT` (optional, defaults to `22`)
-- `PROD_APP_PATH` (absolute path on server where repo is present)
+- Push to `dev`: deploys to Firebase Hosting preview channel `dev`
+- Push to `main`: deploys to Firebase Hosting `live` channel
 
-### Server prerequisites
+Live URL:
 
-- `git` installed
-- `docker` + `docker compose` installed
-- Repository already cloned at `*_APP_PATH`
-- Runtime `.env` configured on server
+- `https://meena-bazar-association.web.app`
 
 Set verbosity via:
 
