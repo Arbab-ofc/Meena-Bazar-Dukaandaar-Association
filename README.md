@@ -29,6 +29,7 @@ This project includes:
 13. [Logging](#logging)
 14. [Troubleshooting](#troubleshooting)
 15. [Scripts](#scripts)
+16. [GitHub Actions CI/CD](#github-actions-cicd)
 
 ---
 
@@ -321,6 +322,45 @@ Also included:
 
 - Runtime global logging (`window.onerror`, `unhandledrejection`)
 - Service-level logs in auth/firestore/imagekit services
+
+---
+
+## GitHub Actions CI/CD
+
+This repo includes a workflow at:
+
+`/.github/workflows/ci-cd.yml`
+
+### What it does
+
+- On PRs to `main` or `dev`: runs build check (`npm ci` + `npm run build`)
+- On push to `dev`: auto-deploys to dev server via SSH + Docker Compose
+- On push to `main`: auto-deploys to production server via SSH + Docker Compose
+
+### Required GitHub Secrets
+
+For DEV deploy:
+
+- `DEV_HOST`
+- `DEV_USER`
+- `DEV_SSH_KEY`
+- `DEV_PORT` (optional, defaults to `22`)
+- `DEV_APP_PATH` (absolute path on server where repo is present)
+
+For PROD deploy:
+
+- `PROD_HOST`
+- `PROD_USER`
+- `PROD_SSH_KEY`
+- `PROD_PORT` (optional, defaults to `22`)
+- `PROD_APP_PATH` (absolute path on server where repo is present)
+
+### Server prerequisites
+
+- `git` installed
+- `docker` + `docker compose` installed
+- Repository already cloned at `*_APP_PATH`
+- Runtime `.env` configured on server
 
 Set verbosity via:
 
