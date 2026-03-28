@@ -110,7 +110,7 @@ const Home = () => {
             Patna Market, Bihar — Established Association
           </motion.p>
           <motion.h1 variants={fadeInUp} className="mt-4 font-heading text-5xl leading-tight text-text md:text-7xl">
-            Meena Bazar Dukaandaar Association
+            Patna Market Dukaandaar Association
           </motion.h1>
           <motion.p variants={fadeInUp} className="mt-4 font-heading text-3xl italic text-text md:text-4xl">
             Unity is Strength

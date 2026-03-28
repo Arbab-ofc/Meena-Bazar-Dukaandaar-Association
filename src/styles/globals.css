@@ -71,8 +71,15 @@ body,
   min-height: 100%;
 }
 
+html {
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
   font-family: Inter, Manrope, system-ui, sans-serif;

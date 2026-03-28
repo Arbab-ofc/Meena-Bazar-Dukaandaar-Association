@@ -47,8 +47,8 @@ const Header = () => {
       <motion.header animate={{ opacity: 1 }} className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${headerClass}`}>
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-3 md:px-6">
           <Link to="/" className="min-w-0">
-            <p className="truncate font-heading text-lg tracking-wide text-text md:text-2xl">Meena Bazar Dukaandaar Association</p>
-            <p className="truncate text-xs uppercase tracking-[0.16em] text-gold-muted">Patna Market, Bihar</p>
+            <p className="truncate font-heading text-lg tracking-wide text-text md:text-2xl">Patna Market Dukaandaar Association</p>
+            <p className="truncate text-xs uppercase tracking-[0.16em] text-gold-muted">Meena Bazar</p>
           </Link>
 
           <div className="flex items-center gap-2 justify-self-end">
