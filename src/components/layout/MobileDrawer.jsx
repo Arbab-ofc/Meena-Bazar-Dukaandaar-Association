@@ -27,8 +27,8 @@ const MobileDrawer = ({ open, onClose, links, isAdmin = false, onLogout }) => {
             exit={{ x: '100%' }}
             transition={reduceMotion ? { duration: 0.01 } : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="font-heading text-2xl text-text">Meena Bazar Dukaandaar Association</p>
-            <p className="mt-1 text-xs uppercase tracking-[0.2em] text-gold-muted">Patna Market, Bihar</p>
+            <p className="font-heading text-2xl text-text">Patna Market Dukaandaar Association</p>
+            <p className="mt-1 text-xs uppercase tracking-[0.2em] text-gold-muted">Meena Bazar</p>
             <div className="mt-6 flex items-center justify-between">
               <span className="text-sm text-text-muted">Theme</span>
               <ThemeToggle />
