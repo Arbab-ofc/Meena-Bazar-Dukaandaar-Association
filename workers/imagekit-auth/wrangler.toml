@@ -1,0 +1,4 @@
+name = "imagekit-auth"
+main = "src/index.js"
+compatibility_date = "2025-05-04"
+workers_dev = true

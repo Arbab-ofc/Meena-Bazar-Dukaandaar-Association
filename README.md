@@ -7,7 +7,7 @@ This project includes:
 - Public-facing website (home, notices, legal updates, members, documents, gallery, contact)
 - Admin panel for content/data management
 - Firebase Auth + Firestore integration
-- ImageKit upload workflow for media/documents
+- ImageKit upload workflow for media/documents via a free Cloudflare Worker signer
 - Dockerized production serving via Nginx
 
 ---
@@ -79,6 +79,7 @@ This project includes:
 - **Icons**: Lucide React
 - **Backend services**: Firebase Authentication + Firestore
 - **Media hosting**: ImageKit
+- **Upload signing**: Cloudflare Workers
 - **Containerization**: Docker, Docker Compose, Nginx
 
 ---
@@ -109,6 +110,11 @@ src/
 docker/
   nginx/
     default.conf
+workers/
+  imagekit-auth/
+    src/
+      index.js
+    wrangler.toml
 
 Dockerfile
 docker-compose.yml
@@ -123,6 +129,7 @@ docker-compose.yml
 - npm 9+
 - Firebase project (Auth + Firestore)
 - ImageKit account
+- Cloudflare account for the free production upload signer
 - Docker + Docker Compose (for containerized deployment)
 
 ---
@@ -147,10 +154,14 @@ VITE_FIREBASE_APP_ID=
 
 VITE_IMAGEKIT_ENDPOINT=https://ik.imagekit.io/<your_imagekit_id>/
 VITE_IMAGEKIT_PUBLIC_KEY=<your_imagekit_public_key>
-VITE_IMAGEKIT_AUTH_ENDPOINT=/api/imagekit-auth
+VITE_IMAGEKIT_AUTH_ENDPOINT=https://<your-worker>.workers.dev/api/imagekit-auth
 
-# Used by local Vite dev auth endpoint for ImageKit signing
+# Used only by local Vite dev auth endpoint for ImageKit signing.
+# Do not expose this with a VITE_ prefix.
 IMAGEKIT_PRIVATE_KEY=<your_imagekit_private_key>
+
+# Optional local dev mirror of the ImageKit public key.
+IMAGEKIT_PUBLIC_KEY=<your_imagekit_public_key>
 
 # Logging verbosity: debug | info | warn | error | silent
 VITE_LOG_LEVEL=debug
@@ -159,7 +170,10 @@ VITE_LOG_LEVEL=debug
 ### Notes
 
 - Never expose `IMAGEKIT_PRIVATE_KEY` in client-side code.
-- In this project, local dev auth endpoint is served by Vite server middleware at `/api/imagekit-auth`.
+- In local development, the auth endpoint is served by Vite middleware at `/api/imagekit-auth`.
+- For free production uploads, use the Cloudflare Worker in `workers/imagekit-auth`.
+- Store `IMAGEKIT_PRIVATE_KEY` and `IMAGEKIT_PUBLIC_KEY` as Cloudflare Worker secrets before deploying.
+- The frontend should point `VITE_IMAGEKIT_AUTH_ENDPOINT` to the deployed Worker URL in production.
 
 ---
 
@@ -296,9 +310,35 @@ Implemented admin upload workflows:
 Flow:
 
 1. Select file
-2. Fetch signed auth params from `/api/imagekit-auth`
+2. Fetch signed auth params from `/api/imagekit-auth` in local dev or from the deployed Cloudflare Worker in production
 3. Upload to ImageKit
 4. Save returned URL/public id in Firestore
+
+Local setup for uploads:
+
+1. Start the Vite dev server.
+2. Keep `IMAGEKIT_PRIVATE_KEY` in `.env`.
+3. Keep `VITE_IMAGEKIT_AUTH_ENDPOINT=/api/imagekit-auth` or leave it unset.
+
+Production setup for uploads:
+
+1. Go to `workers/imagekit-auth`.
+2. Install dependencies with `npm install`.
+3. Log in to Cloudflare with `npx wrangler login`.
+4. Store `IMAGEKIT_PRIVATE_KEY` and `IMAGEKIT_PUBLIC_KEY` as Worker secrets.
+5. Deploy the Worker with `npx wrangler deploy`.
+6. Set `VITE_IMAGEKIT_AUTH_ENDPOINT` to the deployed Worker URL.
+
+Example:
+
+```bash
+cd workers/imagekit-auth
+npm install
+npx wrangler login
+npx wrangler secret put IMAGEKIT_PRIVATE_KEY
+npx wrangler secret put IMAGEKIT_PUBLIC_KEY
+npx wrangler deploy
+```
 
 ---
 
@@ -371,8 +411,9 @@ Use `warn`/`error` in production for quieter output.
 
 ### 2) Image upload fails with auth endpoint error
 
-- Verify `VITE_IMAGEKIT_AUTH_ENDPOINT=/api/imagekit-auth`
-- Ensure `.env` contains `IMAGEKIT_PRIVATE_KEY` and `VITE_IMAGEKIT_PUBLIC_KEY`
+- Verify `VITE_IMAGEKIT_AUTH_ENDPOINT` points to the deployed Cloudflare Worker
+- For local dev, ensure `.env` contains `IMAGEKIT_PRIVATE_KEY` and `VITE_IMAGEKIT_PUBLIC_KEY`
+- For production, set the Cloudflare Worker secrets and deploy the Worker
 - Restart dev server after env changes
 
 ### 3) CORS issues in local upload flow
