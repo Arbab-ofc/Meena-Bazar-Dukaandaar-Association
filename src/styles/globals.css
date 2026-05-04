@@ -69,10 +69,19 @@ html,
 body,
 #root {
   min-height: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+html {
+  width: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
   font-family: Inter, Manrope, system-ui, sans-serif;
@@ -120,11 +129,11 @@ a {
 
 body.mobile-menu-open {
   overflow: hidden;
-  touch-action: none;
 }
 
 .mobile-drawer {
   will-change: transform;
   transform: translateZ(0);
   backface-visibility: hidden;
+  -webkit-overflow-scrolling: touch;
 }

@@ -1,8 +1,6 @@
-import { Bell, Menu, LogOut } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/components/ui/Toast';
 
 const titleMap = {
   '/admin/dashboard': 'Dashboard',
@@ -20,38 +18,21 @@ const titleMap = {
 /** @param {{onToggleSidebar: () => void}} props */
 const AdminHeader = ({ onToggleSidebar }) => {
   const location = useLocation();
-  const { adminData, signOut } = useAuth();
-  const { addToast } = useToast();
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      addToast({ variant: 'success', message: 'Logged out successfully.' });
-    } catch (error) {
-      addToast({ variant: 'error', message: error.message || 'Unable to logout.' });
-    }
-  };
+  const { adminData } = useAuth();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-bg-elevated px-4 md:px-6">
-      <div className="flex items-center gap-3">
-        <button className="inline-flex rounded border border-border p-2 lg:hidden" onClick={onToggleSidebar} aria-label="Toggle admin sidebar">
+    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-border bg-bg-elevated px-3 py-2 sm:px-4 md:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+        <button className="inline-flex shrink-0 rounded border border-border p-2 lg:hidden" onClick={onToggleSidebar} aria-label="Toggle admin sidebar">
           <Menu className="h-4 w-4" />
         </button>
-        <h1 className="font-heading text-3xl text-text">{titleMap[location.pathname] || 'Admin'}</h1>
+        <h1 className="min-w-0 truncate font-heading text-2xl leading-tight text-text sm:text-3xl">{titleMap[location.pathname] || 'Admin'}</h1>
       </div>
-      <div className="flex items-center gap-3">
-        <div className="hidden text-right sm:block">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div className="hidden text-right md:block">
           <p className="text-sm text-text">{adminData?.name || 'Administrator'}</p>
           <p className="text-xs text-text-muted">{adminData?.role || 'Admin'}</p>
         </div>
-        <ThemeToggle />
-        <button className="rounded border border-border p-2 text-text-muted" aria-label="Notifications">
-          <Bell className="h-4 w-4" />
-        </button>
-        <button className="rounded border border-border p-2 text-text-muted" aria-label="Logout" onClick={handleLogout}>
-          <LogOut className="h-4 w-4" />
-        </button>
       </div>
     </header>
   );

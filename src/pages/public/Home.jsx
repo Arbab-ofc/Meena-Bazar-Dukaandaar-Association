@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { FileText, Scale, Shield, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, Scale, Shield, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import HeroBackground from '@/components/three/HeroBackground';
 import SectionHeading from '@/components/ui/SectionHeading';
@@ -62,7 +62,12 @@ const Home = () => {
   const [gallery, setGallery] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeGalleryIndex, setActiveGalleryIndex] = useState(-1);
+  const [teamSlideIndex, setTeamSlideIndex] = useState(0);
+  const [isTeamPaused, setTeamPaused] = useState(false);
+  const [gallerySlideIndex, setGallerySlideIndex] = useState(0);
+  const [isGalleryPaused, setGalleryPaused] = useState(false);
   const { resolvedTheme } = useTheme();
+  const leadershipItems = team.slice(0, 4);
   const galleryItems = gallery.slice(0, 6);
   const activeGalleryItem = activeGalleryIndex >= 0 ? galleryItems[activeGalleryIndex] : null;
 
@@ -93,6 +98,34 @@ const Home = () => {
     load();
   }, []);
 
+  useEffect(() => {
+    if (galleryItems.length < 2 || isGalleryPaused) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setGallerySlideIndex((index) => (index + 1) % galleryItems.length);
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, [galleryItems.length, isGalleryPaused]);
+
+  useEffect(() => {
+    if (gallerySlideIndex >= galleryItems.length) setGallerySlideIndex(0);
+  }, [galleryItems.length, gallerySlideIndex]);
+
+  useEffect(() => {
+    if (leadershipItems.length < 2 || isTeamPaused) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setTeamSlideIndex((index) => (index + 1) % leadershipItems.length);
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, [isTeamPaused, leadershipItems.length]);
+
+  useEffect(() => {
+    if (teamSlideIndex >= leadershipItems.length) setTeamSlideIndex(0);
+  }, [leadershipItems.length, teamSlideIndex]);
+
   const highlightsRef = useRef(null);
   const highlightsInView = useInView(highlightsRef, { once: true, margin: '-100px' });
   const heroOverlayClass =
@@ -102,27 +135,24 @@ const Home = () => {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-20 md:px-6">
+      <section className="relative flex min-h-[calc(100svh-5rem)] items-center justify-center overflow-hidden px-4 py-8 md:min-h-screen md:px-6 md:py-20">
         <HeroBackground />
         <div className={`absolute inset-0 bg-gradient-to-b ${heroOverlayClass}`} />
         <motion.div className="relative z-10 mx-auto max-w-4xl text-center" variants={staggerContainer} initial="hidden" animate="visible">
-          <motion.p variants={fadeInUp} className="text-xs font-semibold uppercase tracking-[0.25em] text-text md:text-sm">
-            Patna Market, Bihar — Established Association
-          </motion.p>
-          <motion.h1 variants={fadeInUp} className="mt-4 font-heading text-5xl leading-tight text-text md:text-7xl">
-            Meena Bazar Dukaandaar Association
+          <motion.h1 variants={fadeInUp} className="mt-4 font-heading text-4xl leading-tight text-text sm:text-5xl md:text-7xl">
+            Patna Market Dukaandaar Association
           </motion.h1>
-          <motion.p variants={fadeInUp} className="mt-4 font-heading text-3xl italic text-text md:text-4xl">
+          <motion.p variants={fadeInUp} className="mt-4 font-heading text-2xl italic text-text sm:text-3xl md:text-4xl">
             Unity is Strength
           </motion.p>
           <motion.p variants={fadeInUp} className="mt-2 font-heading text-2xl italic text-gold">
             एकता में शक्ति
           </motion.p>
           <motion.div variants={fadeInUp} className="mx-auto mt-6 h-px w-16 bg-gold" />
-          <motion.p variants={fadeInUp} className="mx-auto mt-6 max-w-2xl text-balance text-lg text-text">
+          <motion.p variants={fadeInUp} className="mx-auto mt-5 max-w-2xl text-balance text-base text-text sm:mt-6 sm:text-lg">
             Representing the collective interests, legal rights, and commercial welfare of the merchants of Meena Bazar, Patna — with integrity, documentation, and unity.
           </motion.p>
-          <motion.div variants={fadeInUp} className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <motion.div variants={fadeInUp} className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:mt-8">
             <Link to="/notices"><Button>View Notices</Button></Link>
             <Link to="/contact"><Button variant="secondary">Contact Us</Button></Link>
           </motion.div>
@@ -225,20 +255,128 @@ const Home = () => {
 
       <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
         <SectionHeading title="Our Leadership" subtitle="Representing the association with accountability and service." />
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">{team.slice(0, 4).map((member) => <TeamCard key={member.id} member={member} />)}</div>
+        {leadershipItems.length ? (
+          <>
+            <div
+              className="mt-10 sm:hidden"
+              onMouseEnter={() => setTeamPaused(true)}
+              onMouseLeave={() => setTeamPaused(false)}
+              onFocus={() => setTeamPaused(true)}
+              onBlur={() => setTeamPaused(false)}
+            >
+              <div className="overflow-hidden">
+                <motion.div
+                  key={leadershipItems[teamSlideIndex]?.id}
+                  initial={{ opacity: 0, x: 18 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <TeamCard member={leadershipItems[teamSlideIndex]} />
+                </motion.div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  aria-label="Previous leader"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded border border-border bg-surface transition hover:bg-surface-2"
+                  onClick={() => setTeamSlideIndex((index) => (index - 1 + leadershipItems.length) % leadershipItems.length)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+
+                <div className="flex items-center justify-center gap-2">
+                  {leadershipItems.map((member, index) => (
+                    <button
+                      key={member.id}
+                      type="button"
+                      aria-label={`Show leader ${index + 1}`}
+                      className={`h-2.5 rounded-full transition-all ${teamSlideIndex === index ? 'w-6 bg-gold' : 'w-2.5 bg-border-strong'}`}
+                      onClick={() => setTeamSlideIndex(index)}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  aria-label="Next leader"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded border border-border bg-surface transition hover:bg-surface-2"
+                  onClick={() => setTeamSlideIndex((index) => (index + 1) % leadershipItems.length)}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-10 hidden gap-6 sm:grid sm:grid-cols-2 lg:grid-cols-4">{leadershipItems.map((member) => <TeamCard key={member.id} member={member} />)}</div>
+          </>
+        ) : null}
         <div className="mt-8"><Link to="/team"><Button variant="secondary">Meet the Full Team</Button></Link></div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
         <SectionHeading title="Association in Action" subtitle="Recent moments from meetings, events, and public engagements." />
         {gallery.length ? (
-          <div className="mt-10 grid auto-rows-[220px] grid-cols-1 gap-4 md:grid-cols-4">
-            {galleryItems.map((item, index) => (
-              <div key={item.id} className={index === 0 ? 'md:col-span-2 md:row-span-2' : ''}>
-                <GalleryCard item={item} onClick={() => setActiveGalleryIndex(index)} />
+          <>
+            <div
+              className="mt-10 md:hidden"
+              onMouseEnter={() => setGalleryPaused(true)}
+              onMouseLeave={() => setGalleryPaused(false)}
+              onFocus={() => setGalleryPaused(true)}
+              onBlur={() => setGalleryPaused(false)}
+            >
+              <div className="overflow-hidden">
+                <motion.div
+                  key={galleryItems[gallerySlideIndex]?.id}
+                  initial={{ opacity: 0, x: 18 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <GalleryCard item={galleryItems[gallerySlideIndex]} onClick={() => setActiveGalleryIndex(gallerySlideIndex)} />
+                </motion.div>
               </div>
-            ))}
-          </div>
+
+              <div className="mt-4 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  aria-label="Previous gallery item"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded border border-border bg-surface transition hover:bg-surface-2"
+                  onClick={() => setGallerySlideIndex((index) => (index - 1 + galleryItems.length) % galleryItems.length)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+
+                <div className="flex items-center justify-center gap-2">
+                  {galleryItems.map((item, index) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      aria-label={`Show gallery item ${index + 1}`}
+                      className={`h-2.5 rounded-full transition-all ${gallerySlideIndex === index ? 'w-6 bg-gold' : 'w-2.5 bg-border-strong'}`}
+                      onClick={() => setGallerySlideIndex(index)}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  aria-label="Next gallery item"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded border border-border bg-surface transition hover:bg-surface-2"
+                  onClick={() => setGallerySlideIndex((index) => (index + 1) % galleryItems.length)}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-10 hidden auto-rows-[220px] grid-cols-4 gap-4 md:grid">
+              {galleryItems.map((item, index) => (
+                <div key={item.id} className={index === 0 ? 'md:col-span-2 md:row-span-2' : ''}>
+                  <GalleryCard item={item} onClick={() => setActiveGalleryIndex(index)} />
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <div className="mt-10">
             <EmptyState

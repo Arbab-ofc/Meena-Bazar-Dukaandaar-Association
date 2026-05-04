@@ -30,8 +30,8 @@ const Footer = () => (
     <div className="h-px w-full bg-gradient-to-r from-transparent via-gold to-transparent" />
     <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-14 md:grid-cols-2 lg:grid-cols-4 md:px-6">
       <div>
-        <h3 className="font-heading text-3xl text-text">Meena Bazar Dukaandaar Association</h3>
-        <p className="mt-1 text-sm text-gold-muted">Patna Market, Bihar</p>
+        <h3 className="font-heading text-3xl text-text">Patna Market Dukaandaar Association</h3>
+        <p className="mt-1 text-sm text-gold-muted">Meena Bazar</p>
         <p className="mt-4 text-sm text-text-muted">
           A legally registered trade association representing the merchants and shop owners of Meena Bazar, Patna since its establishment. Committed to the welfare, legal protection, and collective strength of its members.
         </p>
@@ -70,7 +70,7 @@ const Footer = () => (
       <div>
         <h4 className="font-heading text-2xl text-text">Contact</h4>
         <div className="mt-4 space-y-3 text-sm text-text-muted">
-          <p className="flex items-start gap-3"><MapPin className="mt-0.5 h-4 w-4 text-gold" /> Meena Bazar, Patna, Bihar, India</p>
+          <p className="flex items-start gap-3"><MapPin className="mt-0.5 h-4 w-4 text-gold" /> Patna Market, Bihar, India</p>
           <p className="flex items-start gap-3"><Phone className="mt-0.5 h-4 w-4 text-gold" /> 7717730628</p>
           <p className="flex items-start gap-3"><Phone className="mt-0.5 h-4 w-4 text-gold" /> 9631724124</p>
           <p className="flex items-start gap-3"><Phone className="mt-0.5 h-4 w-4 text-gold" /> 6202317396</p>
@@ -85,10 +85,10 @@ const Footer = () => (
     </div>
     <div className="border-t border-border">
       <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-text-subtle md:flex-row md:items-center md:justify-between md:px-6">
-        <p>© 2024 Meena Bazar Dukaandaar Association. All rights reserved.</p>
+        <p>© 2024 Patna Market Dukaandaar Association. All rights reserved.</p>
         <p>Patna, Bihar, India</p>
       </div>
-      <p className="pb-4 text-center text-xs text-text-subtle">Designed with care for the merchants of Meena Bazar.</p>
+      <p className="pb-4 text-center text-xs text-text-subtle">Designed with care for the merchants of Patna Market.</p>
     </div>
   </motion.footer>
 );

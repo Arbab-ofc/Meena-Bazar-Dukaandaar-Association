@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { signIn } from '@/services/firebase/authService';
@@ -17,7 +17,6 @@ const Login = () => {
   const { isAdmin, isLoading } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [values, setValues] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -28,8 +27,7 @@ const Login = () => {
   }, []);
 
   if (!isLoading && isAdmin) {
-    const redirect = location.state?.from || '/admin/dashboard';
-    return <Navigate to={redirect} replace />;
+    return <Navigate to="/" replace />;
   }
 
   const onSubmit = async (event) => {
@@ -40,8 +38,7 @@ const Login = () => {
     try {
       await signIn(values.email.trim(), values.password);
       addToast({ variant: 'success', message: 'Signed in successfully.' });
-      const redirect = location.state?.from || '/admin/dashboard';
-      navigate(redirect, { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       const message = mapError(err.code || err.message);
       setError(message);
