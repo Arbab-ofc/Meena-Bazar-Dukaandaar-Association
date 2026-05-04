@@ -21,20 +21,20 @@ const MobileDrawer = ({ open, onClose, links, isAdmin = false, onLogout }) => {
             onClick={onClose}
           />
           <motion.aside
-            className="mobile-drawer fixed right-0 top-0 z-[60] h-full w-[84vw] max-w-[420px] border-l border-border bg-bg-elevated p-6 shadow-xl"
+            className="mobile-drawer fixed right-0 top-0 z-[60] flex h-[100dvh] max-h-[100dvh] w-[84vw] max-w-[420px] flex-col overflow-hidden border-l border-border bg-bg-elevated p-5 shadow-xl sm:p-6"
             initial={{ x: '100%' }}
             animate={{ x: '0%' }}
             exit={{ x: '100%' }}
             transition={reduceMotion ? { duration: 0.01 } : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="font-heading text-2xl text-text">Patna Market Dukaandaar Association</p>
+            <p className="font-heading text-xl leading-tight text-text sm:text-2xl">Patna Market Dukaandaar Association</p>
             <p className="mt-1 text-xs uppercase tracking-[0.2em] text-gold-muted">Meena Bazar</p>
             <div className="mt-6 flex items-center justify-between">
               <span className="text-sm text-text-muted">Theme</span>
               <ThemeToggle />
             </div>
             <motion.nav
-              className="mt-8 space-y-4"
+              className="mt-6 min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain pb-6 pr-2"
               initial="hidden"
               animate="visible"
               variants={{

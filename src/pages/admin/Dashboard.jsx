@@ -99,12 +99,12 @@ const Dashboard = () => {
           </div>
           <div className="space-y-3">
             {notices.slice(0, 5).map((item) => (
-              <div key={item.id} className="flex items-center justify-between rounded-[var(--radius)] border border-border p-3">
-                <div>
-                  <p className="text-sm text-text">{item.title}</p>
+              <div key={item.id} className="flex flex-col gap-3 rounded-[var(--radius)] border border-border p-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <p className="break-words text-sm text-text">{item.title}</p>
                   <p className="text-xs text-text-subtle">{formatDate(item.createdAt)}</p>
                 </div>
-                <Badge variant={item.status === 'published' ? 'success' : 'warning'}>{item.status}</Badge>
+                <Badge className="w-fit shrink-0" variant={item.status === 'published' ? 'success' : 'warning'}>{item.status}</Badge>
               </div>
             ))}
           </div>
@@ -117,12 +117,12 @@ const Dashboard = () => {
           </div>
           <div className="space-y-3">
             {submissions.slice(0, 5).map((item) => (
-              <div key={item.id} className="flex items-center justify-between rounded-[var(--radius)] border border-border p-3">
-                <div>
-                  <p className="text-sm text-text">{item.name}</p>
-                  <p className="text-xs text-text-subtle">{item.email}</p>
+              <div key={item.id} className="flex flex-col gap-3 rounded-[var(--radius)] border border-border p-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <p className="break-words text-sm text-text">{item.name}</p>
+                  <p className="break-words text-xs text-text-subtle">{item.email}</p>
                 </div>
-                <Badge variant={item.status === 'new' ? 'warning' : item.status === 'replied' ? 'success' : 'accent'}>{item.status}</Badge>
+                <Badge className="w-fit shrink-0" variant={item.status === 'new' ? 'warning' : item.status === 'replied' ? 'success' : 'accent'}>{item.status}</Badge>
               </div>
             ))}
           </div>

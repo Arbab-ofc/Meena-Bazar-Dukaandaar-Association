@@ -54,7 +54,7 @@ const Header = () => {
           <div className="flex items-center gap-2 justify-self-end">
             <button
               aria-label="Toggle menu"
-              className="relative inline-flex h-10 items-center gap-2 rounded border border-border bg-surface px-3"
+              className="relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded border border-border bg-surface sm:w-auto sm:gap-2 sm:px-3"
               onClick={() => setMobileOpen((prev) => !prev)}
             >
               <motion.span

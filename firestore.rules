@@ -43,37 +43,37 @@ service cloud.firestore {
 
     // ========== Public collections (read) / Admin (write) ==========
     match /notices/{docId} {
-      allow read: if isPublicReadable();
+      allow read: if isPublicReadable() || isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
     match /legal_updates/{docId} {
-      allow read: if isPublicReadable();
+      allow read: if isPublicReadable() || isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
     match /team_members/{docId} {
-      allow read: if isPublicReadable();
+      allow read: if isPublicReadable() || isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
     match /members/{docId} {
-      allow read: if isPublicReadable();
+      allow read: if isPublicReadable() || isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
     match /documents/{docId} {
-      allow read: if isPublicReadable();
+      allow read: if isPublicReadable() || isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
     match /gallery/{docId} {
-      allow read: if isPublicReadable();
+      allow read: if isPublicReadable() || isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
     match /links/{docId} {
-      allow read: if isPublicReadable();
+      allow read: if isPublicReadable() || isAdmin();
       allow create, update, delete: if isAdmin();
     }
 

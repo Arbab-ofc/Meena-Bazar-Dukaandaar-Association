@@ -83,6 +83,19 @@ const AdminMembers = () => {
     }
   };
 
+  const openEdit = (item) => {
+    setEditing(item);
+    setValues({
+      ...getInitialValues(),
+      ...item,
+      schedule: { ...defaultSchedule(), ...(item.schedule || {}) }
+    });
+    setShopImageFile(null);
+    setOwnerImageFile(null);
+    setUploadError('');
+    setOpen(true);
+  };
+
   const onSubmit = async (event) => {
     event.preventDefault();
     const payload = {
@@ -98,19 +111,49 @@ const AdminMembers = () => {
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <h2 className="font-heading text-4xl text-text">Members</h2>
-        <div className="flex gap-2">
-          <Input placeholder="Search members" value={search} onChange={(event) => setSearch(event.target.value)} />
-          <Button onClick={() => { setEditing(null); setValues(getInitialValues()); setShopImageFile(null); setOwnerImageFile(null); setUploadError(''); setOpen(true); }}>
+        <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] lg:min-w-[460px]">
+          <Input className="min-w-0" placeholder="Search members" value={search} onChange={(event) => setSearch(event.target.value)} />
+          <Button className="w-full sm:w-auto" onClick={() => { setEditing(null); setValues(getInitialValues()); setShopImageFile(null); setOwnerImageFile(null); setUploadError(''); setOpen(true); }}>
             Add Member
           </Button>
         </div>
       </div>
 
       <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
+        <div className="divide-y divide-border md:hidden">
+          {paginated.length ? (
+            paginated.map((item) => (
+              <article key={item.id} className="p-4">
+                <div className="flex flex-col gap-3">
+                  <div className="min-w-0">
+                    <div className="mb-2 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="break-words font-heading text-2xl leading-tight text-text">{item.shopName}</p>
+                        <p className="mt-1 break-words text-sm text-text-muted">{item.ownerName}</p>
+                      </div>
+                      <span className="shrink-0 rounded-full border border-border bg-surface-2 px-2.5 py-1 text-xs text-text-muted">
+                        {item.status}
+                      </span>
+                    </div>
+                    <p className="text-xs uppercase tracking-[0.12em] text-gold">Shop No. {item.shopNumber}</p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button aria-label="Edit member" className="inline-flex h-10 w-10 items-center justify-center rounded border border-border" onClick={() => openEdit(item)}><Pencil className="h-4 w-4" /></button>
+                    <button aria-label="Delete member" className="inline-flex h-10 w-10 items-center justify-center rounded border border-red-500/30 text-red-600" onClick={async () => { if (window.confirm('Delete this member?')) { await deleteMember(item.id); await load(); } }}><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                </div>
+              </article>
+            ))
+          ) : (
+            <p className="p-4 text-sm text-text-muted">No members found.</p>
+          )}
+        </div>
+
+        <div className="hidden md:block">
+          <table className="w-full text-sm">
             <thead className="bg-surface-2 text-left text-text-muted">
               <tr>
                 <th className="px-4 py-3">Shop Number</th>
@@ -121,36 +164,28 @@ const AdminMembers = () => {
               </tr>
             </thead>
             <tbody>
-              {paginated.map((item) => (
+              {paginated.length ? paginated.map((item) => (
                 <tr key={item.id} className="border-t border-border">
                   <td className="px-4 py-3">{item.shopNumber}</td>
-                  <td className="px-4 py-3">{item.shopName}</td>
-                  <td className="px-4 py-3">{item.ownerName}</td>
+                  <td className="max-w-sm px-4 py-3"><p className="break-words">{item.shopName}</p></td>
+                  <td className="max-w-sm px-4 py-3"><p className="break-words">{item.ownerName}</p></td>
                   <td className="px-4 py-3">{item.status}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button
+                        aria-label="Edit member"
                         className="rounded border border-border p-2"
-                        onClick={() => {
-                          setEditing(item);
-                          setValues({
-                            ...getInitialValues(),
-                            ...item,
-                            schedule: { ...defaultSchedule(), ...(item.schedule || {}) }
-                          });
-                          setShopImageFile(null);
-                          setOwnerImageFile(null);
-                          setUploadError('');
-                          setOpen(true);
-                        }}
+                        onClick={() => openEdit(item)}
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
-                      <button className="rounded border border-red-500/30 p-2 text-red-600" onClick={async () => { if (window.confirm('Delete this member?')) { await deleteMember(item.id); await load(); } }}><Trash2 className="h-4 w-4" /></button>
+                      <button aria-label="Delete member" className="rounded border border-red-500/30 p-2 text-red-600" onClick={async () => { if (window.confirm('Delete this member?')) { await deleteMember(item.id); await load(); } }}><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr><td className="px-4 py-4 text-text-muted" colSpan={5}>No members found.</td></tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -1,5 +1,6 @@
 import { Bell, FolderOpen, Image, LayoutDashboard, Link as LinkIcon, LogOut, MessageSquare, Scale, Store, User, Users } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/Toast';
 
@@ -47,6 +48,10 @@ const AdminSidebar = ({ mobile = false, onNavigate }) => {
           </NavLink>
         ))}
       </nav>
+      <div className="mt-4 flex items-center justify-between rounded-[var(--radius)] border border-border px-3 py-2">
+        <span className="text-sm text-text-muted">Theme</span>
+        <ThemeToggle />
+      </div>
       <button onClick={handleLogout} className="mt-4 inline-flex items-center gap-2 rounded-[var(--radius)] border border-border px-3 py-2 text-sm text-text-muted transition hover:bg-surface-2 hover:text-text">
         <LogOut className="h-4 w-4" /> Logout
       </button>
