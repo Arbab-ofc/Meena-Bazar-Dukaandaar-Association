@@ -2,7 +2,10 @@ import { createLogger } from '@/utils/logger';
 
 const endpoint = import.meta.env.VITE_IMAGEKIT_ENDPOINT || 'https://ik.imagekit.io/0aimsgqkt/';
 const uploadEndpoint = import.meta.env.VITE_IMAGEKIT_UPLOAD_URL || 'https://upload.imagekit.io/api/v1/files/upload';
-const rawAuthEndpoint = import.meta.env.VITE_IMAGEKIT_AUTH_ENDPOINT || '/api/imagekit-auth';
+const defaultAuthEndpoint = import.meta.env.PROD
+  ? 'https://imagekit-auth.arbabprvt.workers.dev/api/imagekit-auth'
+  : '/api/imagekit-auth';
+const rawAuthEndpoint = import.meta.env.VITE_IMAGEKIT_AUTH_ENDPOINT || defaultAuthEndpoint;
 const authEndpoint =
   /^https?:\/\/localhost:5000\/api\/imagekit-auth\/?$/i.test(rawAuthEndpoint)
     ? '/api/imagekit-auth'
