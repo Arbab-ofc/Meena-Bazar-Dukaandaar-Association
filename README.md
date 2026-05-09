@@ -1,104 +1,107 @@
 # Meena Bazar Dukaandaar Association
 
-Official web platform for **Meena Bazar Dukaandaar Association (Patna, Bihar)**.
+Official web platform for **Meena Bazar Dukaandaar Association, Patna, Bihar**.
 
-This project includes:
+The application includes a public website, an admin portal, Firebase-backed content management, ImageKit media uploads, Firebase Hosting support, and a Docker/Nginx production setup.
 
-- Public-facing website (home, notices, legal updates, members, documents, gallery, contact)
-- Admin panel for content/data management
-- Firebase Auth + Firestore integration
-- ImageKit upload workflow for media/documents via a free Cloudflare Worker signer
-- Dockerized production serving via Nginx
+## Contents
 
----
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Requirements](#requirements)
+- [Environment Variables](#environment-variables)
+- [Local Development](#local-development)
+- [Production Build](#production-build)
+- [Firebase Setup](#firebase-setup)
+- [ImageKit Upload Setup](#imagekit-upload-setup)
+- [Docker Setup](#docker-setup)
+- [Admin Access](#admin-access)
+- [Data Model](#data-model)
+- [Performance Notes](#performance-notes)
+- [CI/CD](#cicd)
+- [Troubleshooting](#troubleshooting)
+- [Scripts](#scripts)
 
-## Table of Contents
+## Features
 
-1. [Project Highlights](#project-highlights)
-2. [Tech Stack](#tech-stack)
-3. [Folder Structure](#folder-structure)
-4. [Prerequisites](#prerequisites)
-5. [Environment Variables](#environment-variables)
-6. [Local Development](#local-development)
-7. [Build for Production](#build-for-production)
-8. [Docker Compose Setup](#docker-compose-setup)
-9. [Authentication &amp; Admin Access](#authentication--admin-access)
-10. [Data Model Overview](#data-model-overview)
-11. [Image Upload Flow (ImageKit)](#image-upload-flow-imagekit)
-12. [Pagination](#pagination)
-13. [Logging](#logging)
-14. [Troubleshooting](#troubleshooting)
-15. [Scripts](#scripts)
-16. [GitHub Actions CI/CD](#github-actions-cicd)
+### Public Website
 
----
+- Home page with association highlights, latest notices, leadership, gallery, and member shop carousel
+- Public member shop directory
+- Individual shop detail pages at `/members/:id`
+- Shop cards with shop photo, shop number, owner name, timings, and contact number
+- Shop detail page with shop photo, owner photo, owner details, contact number, timings, and weekly schedule
+- About, team, notices, legal updates, documents, gallery, contact, and links pages
+- Published-only visibility for content collections that use `status: published`
+- Public read access for member/shop records
+- Responsive mobile and large-screen layouts
 
-## Project Highlights
+### Admin Portal
 
-### Public Pages
+- Login, signup, forgot password, dashboard, and profile
+- Manage notices
+- Manage legal updates
+- Manage documents with ImageKit upload
+- Manage gallery with ImageKit upload
+- Manage links
+- Manage team members with ImageKit upload
+- Manage member shops with:
+  - shop number
+  - shop name
+  - owner name
+  - contact number
+  - display order
+  - active/inactive status
+  - opening and closing time
+  - weekly open/closed schedule
+  - shop photo
+  - owner photo
+- Unique display order validation for member shops
+- Contact submission management
 
-- Home
-- About
-- Team
-- Members (expandable member cards with full details)
-- Notices (published notices)
-- Legal Updates
-- Documents
-- Gallery
-- Contact
+### Core Behavior
 
-### Admin Pages
-
-- Login / Signup / Forgot Password
-- Dashboard
-- Manage Notices
-- Manage Legal Updates
-- Manage Documents (ImageKit upload)
-- Manage Gallery (ImageKit upload)
-- Manage Team (ImageKit upload)
-- Manage Members (shop timings, schedule, photos)
-- Contact Submissions
-- Profile
-
-### Core Features
-
-- Role-gated admin area
-- Structured Firestore services
-- Seed bootstrap to DB for selected collections
-- Smooth route scrolling and footer navigation behavior
-- Modern pagination across list-heavy pages
-- Runtime + service-level structured logging
-
----
+- Firebase Auth for admin login
+- Firestore `admins` collection as the admin allow-list
+- Unauthorized users are signed out from admin context
+- Firestore service modules per collection
+- Structured runtime and service logging
+- Route-level lazy loading
+- Vendor chunk splitting for better production performance
+- Desktop-only Three.js hero background loaded lazily after browser idle
 
 ## Tech Stack
 
-- **Frontend**: React 18, React Router 6, Vite 5
-- **Styling**: Tailwind CSS
+- **Frontend**: React 18, Vite 5, React Router 6
+- **Styling**: Tailwind CSS with CSS-variable theme tokens
 - **Animation**: Framer Motion
+- **3D**: Three.js, React Three Fiber, Drei
 - **Icons**: Lucide React
-- **Backend services**: Firebase Authentication + Firestore
+- **Backend services**: Firebase Auth, Cloud Firestore
 - **Media hosting**: ImageKit
-- **Upload signing**: Cloudflare Workers
-- **Containerization**: Docker, Docker Compose, Nginx
+- **Upload signing**: Vite dev middleware, Cloudflare Worker, or Docker auth sidecar
+- **Deployment**: Firebase Hosting or Docker/Nginx
+- **CI**: GitHub Actions build check and Firebase preview deploy for `dev`
 
----
-
-## Folder Structure
+## Project Structure
 
 ```txt
 src/
   app/
+    providers.jsx
   components/
     common/
     layout/
+    theme/
+    three/
     ui/
   contexts/
   data/
   hooks/
   pages/
-    public/
     admin/
+    public/
   routes/
   services/
     firebase/
@@ -107,42 +110,41 @@ src/
   styles/
   utils/
 
-docker/
-  nginx/
-    default.conf
 workers/
   imagekit-auth/
-    src/
-      index.js
+    src/index.js
     wrangler.toml
+
+docker/
+  auth/
+  nginx/
 
 Dockerfile
 docker-compose.yml
-.env.example
+firebase.json
+firestore.rules
+firestore.indexes.json
+vite.config.js
 ```
 
----
+## Requirements
 
-## Prerequisites
-
-- Node.js 20+ (recommended)
+- Node.js 20+
 - npm 9+
-- Firebase project (Auth + Firestore)
+- Firebase project with Authentication and Firestore enabled
 - ImageKit account
-- Cloudflare account for the free production upload signer
-- Docker + Docker Compose (for containerized deployment)
-
----
+- Cloudflare account if using the Worker signer
+- Docker and Docker Compose if using containerized deployment
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and configure values.
+Create `.env` from `.env.example`.
 
 ```bash
 cp .env.example .env
 ```
 
-### Required
+Recommended variables:
 
 ```env
 VITE_FIREBASE_API_KEY=
@@ -154,28 +156,21 @@ VITE_FIREBASE_APP_ID=
 
 VITE_IMAGEKIT_ENDPOINT=https://ik.imagekit.io/<your_imagekit_id>/
 VITE_IMAGEKIT_PUBLIC_KEY=<your_imagekit_public_key>
-VITE_IMAGEKIT_AUTH_ENDPOINT=https://<your-worker>.workers.dev/api/imagekit-auth
+VITE_IMAGEKIT_AUTH_ENDPOINT=/api/imagekit-auth
 
-# Used only by local Vite dev auth endpoint for ImageKit signing.
-# Do not expose this with a VITE_ prefix.
 IMAGEKIT_PRIVATE_KEY=<your_imagekit_private_key>
-
-# Optional local dev mirror of the ImageKit public key.
 IMAGEKIT_PUBLIC_KEY=<your_imagekit_public_key>
 
-# Logging verbosity: debug | info | warn | error | silent
+VITE_ADMIN_SECRET_KEY=<admin_signup_secret>
 VITE_LOG_LEVEL=debug
 ```
 
-### Notes
+Notes:
 
-- Never expose `IMAGEKIT_PRIVATE_KEY` in client-side code.
-- In local development, the auth endpoint is served by Vite middleware at `/api/imagekit-auth`.
-- For free production uploads, use the Cloudflare Worker in `workers/imagekit-auth`.
-- Store `IMAGEKIT_PRIVATE_KEY` and `IMAGEKIT_PUBLIC_KEY` as Cloudflare Worker secrets before deploying.
-- The frontend should point `VITE_IMAGEKIT_AUTH_ENDPOINT` to the deployed Worker URL in production.
-
----
+- Never expose `IMAGEKIT_PRIVATE_KEY` with a `VITE_` prefix.
+- `VITE_ADMIN_SECRET_KEY` is client-visible because Vite embeds `VITE_` variables in the browser bundle. Treat it as a signup friction key, not as the main security boundary.
+- The real admin security boundary is Firebase Auth plus Firestore admin checks.
+- Restart the dev server after changing `.env`.
 
 ## Local Development
 
@@ -185,7 +180,7 @@ Install dependencies:
 npm install
 ```
 
-Start dev server:
+Start the Vite dev server:
 
 ```bash
 npm run dev
@@ -193,143 +188,140 @@ npm run dev
 
 Open:
 
-- `http://localhost:5173`
+```txt
+http://localhost:5173
+```
 
----
+If port `5173` is busy, Vite will use the next available port.
 
-## Build for Production
+## Production Build
+
+Create a production build:
 
 ```bash
 npm run build
 ```
 
-Preview production build locally:
+Preview the production build:
 
 ```bash
 npm run preview
 ```
 
----
+Build output is written to `dist/`.
 
-## Docker Compose Setup
+## Firebase Setup
 
-This repo includes a production-ready Docker stack:
+This project uses:
 
-- Multi-stage `Dockerfile`
-- Nginx SPA config (`docker/nginx/default.conf`)
-- `docker-compose.yml`
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Hosting
+- Firestore Security Rules from `firestore.rules`
 
-### Start
-
-```bash
-docker compose up --build -d
-```
-
-### Access
-
-- `http://localhost:8080`
-
-### Stop
+Deploy Firestore rules:
 
 ```bash
-docker compose down
+firebase deploy --only firestore:rules
 ```
 
-### Validate compose config
+Deploy hosting:
 
 ```bash
-docker compose config
+npm run build
+firebase deploy --only hosting
 ```
 
----
+Deploy both:
 
-## Authentication & Admin Access
+```bash
+npm run build
+firebase deploy
+```
 
-- Admin routes are protected.
-- On login, user is validated against the `admins` Firestore collection.
-- Unauthorized users are signed out from admin context.
+The current Firebase Hosting config is in `firebase.json`.
 
-Admin collection sample fields:
+## Firestore Rules
 
-```json
-{
-  "uid": "firebase-uid",
-  "name": "Admin Name",
-  "email": "admin@example.com",
-  "role": "Admin",
-  "isActive": true
+The canonical rules file is:
+
+```txt
+firestore.rules
+```
+
+Important behavior:
+
+- `members` are publicly readable so shop cards and shop detail pages work for all visitors.
+- `notices`, `legal_updates`, `team_members`, `documents`, `gallery`, and `links` are publicly readable only when they either do not have a `status` field or have `status: published`.
+- Contact submissions can be created publicly with strict validation.
+- Admin-only writes are protected through the `admins` collection.
+- Unknown collections are denied.
+
+Admin check:
+
+```js
+function isAdmin() {
+  return signedIn()
+    && exists(adminDocPath())
+    && get(adminDocPath()).data.isActive == true;
 }
 ```
 
----
+Member read rule:
 
-## Data Model Overview
+```js
+match /members/{docId} {
+  allow read: if true;
+  allow create, update, delete: if isAdmin();
+}
+```
 
-### `notices`
+## ImageKit Upload Setup
 
-- `title`, `slug`, `summary`, `content`, `status`, `featured`, timestamps
+Admin uploads use ImageKit for:
 
-### `legal_updates`
+- documents
+- gallery images
+- team member photos
+- member shop photos
+- member owner photos
+- admin profile avatars
 
-- `title`, `slug`, `caseNumber`, `court`, `summary`, `content`, `status`, `documentLinks`, timestamps
+Upload flow:
 
-### `members`
+1. Admin selects a file.
+2. Client asks an auth endpoint for ImageKit signing parameters.
+3. Client uploads directly to ImageKit.
+4. Returned URL/path is saved in Firestore.
 
-- `shopNumber`, `shopName`, `ownerName`, `status`, `displayOrder`
-- `openTime`, `closeTime`
-- `schedule` (weekly day-wise open/closed map)
-- `shopImageUrl`, `ownerImageUrl`
+### Local Vite Signer
 
-### `team_members`
+In local development, Vite provides `/api/imagekit-auth` through `vite.config.js`.
 
-- `name`, `roleEn`, `roleHi`, `photoUrl`, `designationOrder`, `isLeadership`, `isBoardMember`
+Required `.env` values:
 
-### `documents`
+```env
+IMAGEKIT_PRIVATE_KEY=
+VITE_IMAGEKIT_PUBLIC_KEY=
+```
 
-- `title`, `category`, `description`, `fileUrl`, `fileType`, `tags`, `publicId`, `uploadedBy`, timestamps
+Use:
 
-### `gallery`
+```env
+VITE_IMAGEKIT_AUTH_ENDPOINT=/api/imagekit-auth
+```
 
-- `title`, `category`, `imageUrl`, `thumbnailUrl`, `publicId`, `eventDate`, `location`, timestamps
+or leave it unset for local defaults.
 
-### `contact_submissions`
+### Cloudflare Worker Signer
 
-- `name`, `email`, `phone`, `message`, `status`, timestamps
+Worker location:
 
----
+```txt
+workers/imagekit-auth
+```
 
-## Image Upload Flow (ImageKit)
-
-Implemented admin upload workflows:
-
-- Admin Gallery
-- Admin Documents
-- Admin Team (member photo)
-- Admin Members (shop photo + owner photo)
-
-Flow:
-
-1. Select file
-2. Fetch signed auth params from `/api/imagekit-auth` in local dev or from the deployed Cloudflare Worker in production
-3. Upload to ImageKit
-4. Save returned URL/public id in Firestore
-
-Local setup for uploads:
-
-1. Start the Vite dev server.
-2. Keep `IMAGEKIT_PRIVATE_KEY` in `.env`.
-3. Keep `VITE_IMAGEKIT_AUTH_ENDPOINT=/api/imagekit-auth` or leave it unset.
-
-Production setup for uploads:
-
-1. Go to `workers/imagekit-auth`.
-2. Install dependencies with `npm install`.
-3. Log in to Cloudflare with `npx wrangler login`.
-4. Store `IMAGEKIT_PRIVATE_KEY` and `IMAGEKIT_PUBLIC_KEY` as Worker secrets.
-5. Deploy the Worker with `npx wrangler deploy`.
-6. Set `VITE_IMAGEKIT_AUTH_ENDPOINT` to the deployed Worker URL.
-
-Example:
+Deploy:
 
 ```bash
 cd workers/imagekit-auth
@@ -340,114 +332,385 @@ npx wrangler secret put IMAGEKIT_PUBLIC_KEY
 npx wrangler deploy
 ```
 
----
+Then set:
 
-## Pagination
+```env
+VITE_IMAGEKIT_AUTH_ENDPOINT=https://<your-worker>.workers.dev/api/imagekit-auth
+```
 
-Reusable pagination component is used across public/admin listing pages.
+### Docker Auth Sidecar
 
-Behavior:
+Docker Compose includes an `auth` service that signs ImageKit uploads at:
 
-- Page numbers + previous/next
-- Handles long ranges with ellipsis
-- Resets to page 1 on filter/search/data changes
+```txt
+/api/imagekit-auth
+```
 
----
+Nginx proxies that route to the auth sidecar.
+
+## Docker Setup
+
+Start the stack:
+
+```bash
+docker compose up --build -d
+```
+
+Open:
+
+```txt
+http://localhost:8080
+```
+
+Stop:
+
+```bash
+docker compose down
+```
+
+View logs:
+
+```bash
+docker compose logs -f
+```
+
+Validate config:
+
+```bash
+docker compose config
+```
+
+## Admin Access
+
+Admin route protection works in two layers:
+
+1. Firebase Auth signs in the user.
+2. `AuthContext` checks the user UID against the Firestore `admins` collection.
+
+Admin document sample:
+
+```json
+{
+  "uid": "firebase-uid",
+  "name": "Admin Name",
+  "email": "admin@example.com",
+  "role": "Admin",
+  "isActive": true,
+  "createdAt": "serverTimestamp",
+  "updatedAt": "serverTimestamp"
+}
+```
+
+Admin signup creates a document at `admins/{uid}`. Firestore rules require the signed-in user to create only their own admin profile.
+
+## Data Model
+
+### `admins`
+
+- `uid`
+- `name`
+- `email`
+- `role`
+- `isActive`
+- `avatarUrl`
+- `createdAt`
+- `updatedAt`
+
+### `notices`
+
+- `title`
+- `slug`
+- `summary`
+- `content`
+- `status`: `draft` or `published`
+- `featured`
+- `createdBy`
+- `createdAt`
+- `updatedAt`
+
+### `legal_updates`
+
+- `title`
+- `slug`
+- `caseNumber`
+- `court`
+- `summary`
+- `content`
+- `status`
+- `documentLinks`
+- `createdAt`
+- `updatedAt`
+
+### `members`
+
+- `shopNumber`
+- `shopName`
+- `ownerName`
+- `contactNumber`
+- `displayOrder`
+- `status`: `Active` or `Inactive`
+- `openTime`
+- `closeTime`
+- `schedule`
+- `shopImageUrl`
+- `ownerImageUrl`
+- `createdAt`
+- `updatedAt`
+
+Display order is validated in the admin UI to avoid duplicate ordering.
+
+### `team_members`
+
+- `name`
+- `roleEn`
+- `roleHi`
+- `photoUrl`
+- `designationOrder`
+- `isLeadership`
+- `isBoardMember`
+- `createdAt`
+- `updatedAt`
+
+### `documents`
+
+- `title`
+- `category`
+- `description`
+- `fileUrl`
+- `fileType`
+- `tags`
+- `publicId`
+- `uploadedBy`
+- `createdAt`
+- `updatedAt`
+
+### `gallery`
+
+- `title`
+- `category`
+- `imageUrl`
+- `thumbnailUrl`
+- `publicId`
+- `eventDate`
+- `location`
+- `createdAt`
+- `updatedAt`
+
+### `links`
+
+- `title`
+- `url`
+- `type`
+- `description`
+- `status`
+- `createdBy`
+- `createdAt`
+- `updatedAt`
+
+### `contact_submissions`
+
+- `name`
+- `email`
+- `phone`
+- `message`
+- `status`: `new`, `read`, or `replied`
+- `createdAt`
+- `updatedAt`
+
+## Public Routes
+
+```txt
+/                         Home
+/about                    About
+/team                     Team
+/members                  Member directory
+/members/:id              Member shop detail
+/notices                  Notices
+/notices/:slug            Notice detail
+/legal-updates            Legal updates
+/legal-updates/:slug      Legal update detail
+/documents                Documents
+/gallery                  Gallery
+/contact                  Contact
+/links                    Useful links
+```
+
+## Admin Routes
+
+```txt
+/admin/login
+/admin/signup
+/admin/forgot-password
+/admin/dashboard
+/admin/notices
+/admin/legal-updates
+/admin/documents
+/admin/gallery
+/admin/links
+/admin/team
+/admin/members
+/admin/contact-submissions
+/admin/profile
+```
+
+## Performance Notes
+
+The app uses:
+
+- Route-level lazy loading through React Router
+- Manual vendor chunk splitting in `vite.config.js`
+- Separate chunks for React, Firebase, Framer Motion, Three/R3F, and UI helper libraries
+- Desktop-only Three.js hero background loaded lazily after browser idle
+
+These changes keep the Home route and main entry bundle smaller while allowing the 3D hero to load separately.
+
+## Styling and Theme
+
+- Global styles live in `src/styles/globals.css`.
+- Theme mode is controlled by `ThemeContext`.
+- The active theme is applied as `data-theme` on `document.documentElement`.
+- Tailwind consumes CSS variables from the theme tokens.
 
 ## Logging
 
-Central logger is implemented in `src/utils/logger.js` with scoped logs.
+Logging utilities:
 
-Also included:
+```txt
+src/utils/logger.js
+src/utils/runtimeLogging.js
+```
 
-- Runtime global logging (`window.onerror`, `unhandledrejection`)
-- Service-level logs in auth/firestore/imagekit services
+Logging includes:
 
----
+- scoped service logs
+- auth logs
+- Firestore service logs
+- ImageKit upload logs
+- runtime `window.error` and `unhandledrejection` logs
 
-## GitHub Actions CI/CD
-
-This repo includes a workflow at:
-
-`/.github/workflows/ci-cd.yml`
-
-### What it does
-
-- On PRs to `main` or `dev`: runs build check (`npm ci` + `npm run build`)
-- On push to `dev`: auto-deploys to dev server via SSH + Docker Compose
-- On push to `main`: auto-deploys to production server via SSH + Docker Compose
-
-### Required GitHub Secret
-
-- `FIREBASE_SERVICE_ACCOUNT_MEENA_BAZAR_ASSOCIATION`
-
-Create it from Firebase project service account JSON and add it as a repository secret.
-
-### Deploy behavior
-
-- Push to `dev`: deploys to Firebase Hosting preview channel `dev`
-- Push to `main`: deploys to Firebase Hosting `live` channel
-
-Live URL:
-
-- `https://meena-bazar-association.web.app`
-
-Set verbosity via:
+Set log level with:
 
 ```env
 VITE_LOG_LEVEL=debug
 ```
 
-Use `warn`/`error` in production for quieter output.
+Valid values:
 
----
+```txt
+debug | info | warn | error | silent
+```
+
+## CI/CD
+
+GitHub Actions workflow:
+
+```txt
+.github/workflows/ci-cd.yml
+```
+
+Current workflow behavior:
+
+- Pull requests to `main` or `dev`: install dependencies and run `npm run build`
+- Pushes to `dev`: build and deploy to Firebase Hosting preview channel `dev`
+- Manual dispatch is supported
+
+Required secret:
+
+```txt
+FIREBASE_SERVICE_ACCOUNT_MEENA_BAZAR_ASSOCIATION
+```
+
+Live Firebase Hosting project:
+
+```txt
+meena-bazar-association
+```
 
 ## Troubleshooting
 
-### 1) Published notices not visible
+### Shop cards show but detail page cannot refresh live data
 
-- Ensure notice `status` is `published`.
-- Service now normalizes status casing and fetches robustly.
+Deploy Firestore rules:
 
-### 2) Image upload fails with auth endpoint error
+```bash
+firebase deploy --only firestore:rules
+```
 
-- Verify `VITE_IMAGEKIT_AUTH_ENDPOINT` points to the deployed Cloudflare Worker
-- For local dev, ensure `.env` contains `IMAGEKIT_PRIVATE_KEY` and `VITE_IMAGEKIT_PUBLIC_KEY`
-- For production, set the Cloudflare Worker secrets and deploy the Worker
-- Restart dev server after env changes
+The member rule must allow public reads:
 
-### 3) CORS issues in local upload flow
+```js
+match /members/{docId} {
+  allow read: if true;
+  allow create, update, delete: if isAdmin();
+}
+```
 
-- Use relative endpoint `/api/imagekit-auth` (already default)
-- Vite middleware handles local auth endpoint
+### Duplicate member display order
 
-### 4) Footer links navigate but scroll behavior feels wrong
+The admin UI blocks duplicate display order values. Existing duplicate records must be edited manually in Admin > Members.
 
-- Global scroll manager is implemented for route+hash handling
-- Footer link clicks also force top scroll
+### Image upload auth fails
 
-### 5) Docker container not healthy
+Check:
 
-- Check container logs:
-  ```bash
-  docker compose logs -f web
-  ```
-- Ensure build succeeds and Nginx config is mounted properly
+- `IMAGEKIT_PRIVATE_KEY`
+- `VITE_IMAGEKIT_PUBLIC_KEY`
+- `IMAGEKIT_PUBLIC_KEY`
+- `VITE_IMAGEKIT_AUTH_ENDPOINT`
+- Worker secrets if using Cloudflare
+- Docker auth sidecar logs if using Docker Compose
 
----
+### Firebase permission denied
+
+Check:
+
+- user is authenticated
+- `admins/{uid}` exists
+- admin document has `isActive: true`
+- latest `firestore.rules` are deployed
+
+### Published content not visible
+
+For collections that use `status`, public reads require:
+
+```txt
+status = published
+```
+
+Members are the exception and are publicly readable.
+
+### Docker web container unhealthy
+
+Check:
+
+```bash
+docker compose logs -f web
+docker compose logs -f auth
+```
+
+### Build warning about large chunks
+
+The Three.js chunk is intentionally lazy and desktop-only. It is separated from critical route code.
 
 ## Scripts
 
 ```bash
 npm run dev      # Start Vite dev server
-npm run build    # Production build
+npm run build    # Build production assets into dist/
 npm run preview  # Preview production build locally
 ```
 
----
+Worker scripts:
 
-If you want, next step can be adding:
+```bash
+cd workers/imagekit-auth
+npm run dev
+npm run deploy
+```
 
-- CI pipeline (lint/build/docker)
-- automated tests
-- deployment playbook for VPS/Cloud Run/ECS
+## Current Notes
+
+- There is no automated test suite yet.
+- There is no lint script yet.
+- Firestore rules are maintained in `firestore.rules`.
+- The Cloudflare Worker signer is optional if Docker auth sidecar or local Vite signer is used.
