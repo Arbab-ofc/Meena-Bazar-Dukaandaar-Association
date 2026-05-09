@@ -9,6 +9,7 @@ import Pagination from '@/components/ui/Pagination';
 import { MEMBER_STATUS } from '@/data/constants';
 import { uploadImageToImageKit } from '@/services/imagekit/imagekitService';
 import { createMember, deleteMember, getMembers, updateMember } from '@/services/firestore/membersService';
+import { isValidPhone } from '@/utils/validators';
 
 const WEEK_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const defaultSchedule = () => Object.fromEntries(WEEK_DAYS.map((day) => [day, true]));
@@ -17,6 +18,7 @@ const getInitialValues = () => ({
   shopNumber: '',
   shopName: '',
   ownerName: '',
+  contactNumber: '',
   displayOrder: 1,
   status: MEMBER_STATUS.ACTIVE,
   openTime: '',
@@ -122,8 +124,15 @@ const AdminMembers = () => {
       return;
     }
 
+    const contactNumber = String(values.contactNumber || '').trim();
+    if (contactNumber && !isValidPhone(contactNumber)) {
+      setFormError('Contact number must be a valid 10-digit Indian mobile number.');
+      return;
+    }
+
     const payload = {
       ...values,
+      contactNumber,
       displayOrder,
       schedule: values.schedule || defaultSchedule()
     };
@@ -221,6 +230,7 @@ const AdminMembers = () => {
           <Input label="Shop Number" value={values.shopNumber} onChange={(event) => setValues((prev) => ({ ...prev, shopNumber: event.target.value }))} required />
           <Input label="Shop Name" value={values.shopName} onChange={(event) => setValues((prev) => ({ ...prev, shopName: event.target.value }))} required />
           <Input label="Owner Name" value={values.ownerName} onChange={(event) => setValues((prev) => ({ ...prev, ownerName: event.target.value }))} required />
+          <Input label="Contact Number" type="tel" value={values.contactNumber} onChange={(event) => setValues((prev) => ({ ...prev, contactNumber: event.target.value }))} placeholder="10-digit mobile number" />
           <div className="grid gap-4 md:grid-cols-2">
             <Input label="Shop Open Time" type="time" value={values.openTime} onChange={(event) => setValues((prev) => ({ ...prev, openTime: event.target.value }))} />
             <Input label="Shop Close Time" type="time" value={values.closeTime} onChange={(event) => setValues((prev) => ({ ...prev, closeTime: event.target.value }))} />

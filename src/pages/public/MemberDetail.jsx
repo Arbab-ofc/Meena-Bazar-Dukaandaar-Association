@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { CalendarDays, Clock, Store, UserRound } from 'lucide-react';
+import { CalendarDays, Clock, Phone, Store, UserRound } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import Button from '@/components/ui/Button';
@@ -154,6 +154,18 @@ const MemberDetail = () => {
                 <p className="mt-1 text-sm font-medium text-text">{formatTimeRange(member.openTime, member.closeTime)}</p>
               </div>
             </div>
+
+            {member.contactNumber ? (
+              <div className="flex gap-3 rounded-[var(--radius)] border border-border bg-surface p-3 md:p-4">
+                <Phone className="mt-0.5 h-5 w-5 shrink-0 text-gold" />
+                <div>
+                  <p className="text-xs uppercase tracking-[0.14em] text-text-subtle">Contact Number</p>
+                  <a className="mt-1 block text-sm font-medium text-text transition hover:text-accent" href={`tel:${member.contactNumber}`}>
+                    {member.contactNumber}
+                  </a>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="mt-5 rounded-[var(--radius)] border border-border bg-surface p-3 md:mt-6 md:p-4">

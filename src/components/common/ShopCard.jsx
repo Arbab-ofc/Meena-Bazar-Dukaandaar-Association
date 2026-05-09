@@ -1,4 +1,4 @@
-import { Clock, Store, UserRound } from 'lucide-react';
+import { Clock, Phone, Store, UserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Badge from '@/components/ui/Badge';
 import ImageKitImage from '@/components/ui/ImageKitImage';
@@ -54,6 +54,12 @@ const ShopCard = ({ shop }) => {
             <Clock className="h-4 w-4 shrink-0 text-gold" />
             <span className="min-w-0 truncate">{formatTimeRange(shop.openTime, shop.closeTime)}</span>
           </p>
+          {shop.contactNumber ? (
+            <p className="flex items-center gap-2">
+              <Phone className="h-4 w-4 shrink-0 text-gold" />
+              <span className="min-w-0 truncate">{shop.contactNumber}</span>
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-auto pt-5">
