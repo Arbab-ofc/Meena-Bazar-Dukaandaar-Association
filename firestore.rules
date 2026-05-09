@@ -58,7 +58,7 @@ service cloud.firestore {
     }
 
     match /members/{docId} {
-      allow read: if isPublicReadable() || isAdmin();
+      allow read: if true;
       allow create, update, delete: if isAdmin();
     }
 

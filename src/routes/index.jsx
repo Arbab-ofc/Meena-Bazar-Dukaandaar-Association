@@ -9,6 +9,7 @@ const Home = lazy(() => import('@/pages/public/Home'));
 const About = lazy(() => import('@/pages/public/About'));
 const Team = lazy(() => import('@/pages/public/Team'));
 const Members = lazy(() => import('@/pages/public/Members'));
+const MemberDetail = lazy(() => import('@/pages/public/MemberDetail'));
 const Notices = lazy(() => import('@/pages/public/Notices'));
 const NoticeDetail = lazy(() => import('@/pages/public/NoticeDetail'));
 const LegalUpdates = lazy(() => import('@/pages/public/LegalUpdates'));
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
       { path: 'about', element: withSuspense(<About />) },
       { path: 'team', element: withSuspense(<Team />) },
       { path: 'members', element: withSuspense(<Members />) },
+      { path: 'members/:id', element: withSuspense(<MemberDetail />) },
       { path: 'notices', element: withSuspense(<Notices />) },
       { path: 'notices/:slug', element: withSuspense(<NoticeDetail />) },
       { path: 'legal-updates', element: withSuspense(<LegalUpdates />) },

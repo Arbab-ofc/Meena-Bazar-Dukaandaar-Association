@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import NoticeCard from '@/components/common/NoticeCard';
 import TeamCard from '@/components/common/TeamCard';
 import GalleryCard from '@/components/common/GalleryCard';
+import ShopCarousel from '@/components/common/ShopCarousel';
 import Skeleton from '@/components/ui/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import Modal from '@/components/ui/Modal';
@@ -14,6 +15,7 @@ import ImageKitImage from '@/components/ui/ImageKitImage';
 import { getPublishedNotices } from '@/services/firestore/noticesService';
 import { getTeamMembers } from '@/services/firestore/teamService';
 import { getGalleryItems } from '@/services/firestore/galleryService';
+import { getMembers } from '@/services/firestore/membersService';
 import { SEED_TEAM_MEMBERS } from '@/data/seedData';
 import { useTheme } from '@/hooks/useTheme';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -62,6 +64,7 @@ const Home = () => {
   const [notices, setNotices] = useState([]);
   const [team, setTeam] = useState([]);
   const [gallery, setGallery] = useState([]);
+  const [memberShops, setMemberShops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeGalleryIndex, setActiveGalleryIndex] = useState(-1);
   const [teamSlideIndex, setTeamSlideIndex] = useState(0);
@@ -72,6 +75,9 @@ const Home = () => {
   const { resolvedTheme } = useTheme();
   const shouldRenderHeroBackground = useMediaQuery('(min-width: 768px)');
   const leadershipItems = team.slice(0, 4);
+  const activeMemberShops = memberShops
+    .filter((shop) => String(shop.status || '').toLowerCase() === 'active')
+    .slice(0, 12);
   const galleryItems = gallery.slice(0, 6);
   const activeGalleryItem = activeGalleryIndex >= 0 ? galleryItems[activeGalleryIndex] : null;
 
@@ -96,10 +102,11 @@ const Home = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [noticeResult, teamResult, galleryResult] = await Promise.allSettled([
+      const [noticeResult, teamResult, galleryResult, memberResult] = await Promise.allSettled([
         getPublishedNotices(3),
         getTeamMembers(),
-        getGalleryItems()
+        getGalleryItems(),
+        getMembers()
       ]);
 
       setNotices(noticeResult.status === 'fulfilled' ? noticeResult.value : []);
@@ -111,6 +118,7 @@ const Home = () => {
       }
 
       setGallery(galleryResult.status === 'fulfilled' ? galleryResult.value.slice(0, 6) : []);
+      setMemberShops(memberResult.status === 'fulfilled' ? memberResult.value : []);
       setLoading(false);
     };
 
@@ -335,6 +343,22 @@ const Home = () => {
           </>
         ) : null}
         <div className="mt-8"><Link to="/team"><Button variant="secondary">Meet the Full Team</Button></Link></div>
+      </section>
+
+      <section className="bg-surface px-4 py-20 md:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <SectionHeading
+              label="Member Shops"
+              title="Shops of Meena Bazar"
+              subtitle="A rotating look at active member shops listed by the association."
+            />
+            <Link to="/members" className="shrink-0">
+              <Button variant="secondary">View All Shops</Button>
+            </Link>
+          </div>
+          <ShopCarousel shops={activeMemberShops} loading={loading} />
+        </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">

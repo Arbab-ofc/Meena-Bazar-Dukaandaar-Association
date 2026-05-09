@@ -3,6 +3,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
@@ -23,6 +24,19 @@ export const getMembers = async () => {
     return data;
   } catch (error) {
     log.error('Failed to fetch members', { message: error.message });
+    throw error;
+  }
+};
+
+export const getMemberById = async (id) => {
+  try {
+    const snap = await getDoc(doc(db, COLLECTION, id));
+    if (!snap.exists()) return null;
+    const data = { id: snap.id, ...snap.data() };
+    log.debug('Fetched member by id', { id });
+    return data;
+  } catch (error) {
+    log.error('Failed to fetch member by id', { id, message: error.message });
     throw error;
   }
 };
