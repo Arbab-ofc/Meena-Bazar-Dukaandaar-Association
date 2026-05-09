@@ -66,6 +66,33 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: { '@': path.resolve(__dirname, './src') }
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+
+            if (
+              id.includes('@react-three') ||
+              id.includes('/@use-gesture/') ||
+              id.includes('/react-reconciler/') ||
+              id.includes('/zustand/')
+            ) {
+              return 'vendor-r3f';
+            }
+            if (id.includes('/three/')) return 'vendor-three';
+            if (id.includes('/firebase/')) return 'vendor-firebase';
+            if (id.includes('/framer-motion/')) return 'vendor-motion';
+            if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-router-dom/')) {
+              return 'vendor-react';
+            }
+            if (id.includes('/lucide-react/') || id.includes('/date-fns/')) return 'vendor-ui';
+            return undefined;
+          }
+        }
+      },
+      chunkSizeWarningLimit: 750
     }
   };
 });

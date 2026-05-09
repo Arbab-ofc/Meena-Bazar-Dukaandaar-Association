@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { ChevronLeft, ChevronRight, FileText, Scale, Shield, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import HeroBackground from '@/components/three/HeroBackground';
 import SectionHeading from '@/components/ui/SectionHeading';
 import Button from '@/components/ui/Button';
 import NoticeCard from '@/components/common/NoticeCard';
@@ -17,7 +16,10 @@ import { getTeamMembers } from '@/services/firestore/teamService';
 import { getGalleryItems } from '@/services/firestore/galleryService';
 import { SEED_TEAM_MEMBERS } from '@/data/seedData';
 import { useTheme } from '@/hooks/useTheme';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { formatDate } from '@/utils/formatDate';
+
+const HeroBackground = lazy(() => import('@/components/three/HeroBackground'));
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -66,7 +68,9 @@ const Home = () => {
   const [isTeamPaused, setTeamPaused] = useState(false);
   const [gallerySlideIndex, setGallerySlideIndex] = useState(0);
   const [isGalleryPaused, setGalleryPaused] = useState(false);
+  const [canLoadHeroBackground, setCanLoadHeroBackground] = useState(false);
   const { resolvedTheme } = useTheme();
+  const shouldRenderHeroBackground = useMediaQuery('(min-width: 768px)');
   const leadershipItems = team.slice(0, 4);
   const galleryItems = gallery.slice(0, 6);
   const activeGalleryItem = activeGalleryIndex >= 0 ? galleryItems[activeGalleryIndex] : null;
@@ -74,6 +78,21 @@ const Home = () => {
   useEffect(() => {
     document.title = 'Meena Bazar Dukaandaar Association | Patna Market, Bihar';
   }, []);
+
+  useEffect(() => {
+    if (!shouldRenderHeroBackground) {
+      setCanLoadHeroBackground(false);
+      return undefined;
+    }
+
+    if ('requestIdleCallback' in window) {
+      const idleId = window.requestIdleCallback(() => setCanLoadHeroBackground(true), { timeout: 1800 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timeoutId = window.setTimeout(() => setCanLoadHeroBackground(true), 800);
+    return () => window.clearTimeout(timeoutId);
+  }, [shouldRenderHeroBackground]);
 
   useEffect(() => {
     const load = async () => {
@@ -136,7 +155,11 @@ const Home = () => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
       <section className="relative flex min-h-[calc(100svh-5rem)] items-center justify-center overflow-hidden px-4 py-8 md:min-h-screen md:px-6 md:py-20">
-        <HeroBackground />
+        {shouldRenderHeroBackground && canLoadHeroBackground ? (
+          <Suspense fallback={null}>
+            <HeroBackground />
+          </Suspense>
+        ) : null}
         <div className={`absolute inset-0 bg-gradient-to-b ${heroOverlayClass}`} />
         <motion.div className="relative z-10 mx-auto max-w-4xl text-center" variants={staggerContainer} initial="hidden" animate="visible">
           <motion.h1 variants={fadeInUp} className="mt-4 font-heading text-4xl leading-tight text-text sm:text-5xl md:text-7xl">
