@@ -26,6 +26,11 @@ const getInitialValues = () => ({
   schedule: defaultSchedule()
 });
 
+const getNextDisplayOrder = (items = []) => {
+  const orders = items.map((item) => Number(item.displayOrder || 0)).filter((order) => order > 0);
+  return orders.length ? Math.max(...orders) + 1 : 1;
+};
+
 const AdminMembers = () => {
   const [items, setItems] = useState([]);
   const [isOpen, setOpen] = useState(false);
@@ -36,6 +41,7 @@ const AdminMembers = () => {
   const [ownerImageFile, setOwnerImageFile] = useState(null);
   const [uploading, setUploading] = useState('');
   const [uploadError, setUploadError] = useState('');
+  const [formError, setFormError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   const load = async () => setItems(await getMembers());
@@ -63,6 +69,7 @@ const AdminMembers = () => {
     setShopImageFile(null);
     setOwnerImageFile(null);
     setUploadError('');
+    setFormError('');
   };
 
   const uploadMemberImage = async ({ file, folder, field, uploadKey }) => {
@@ -93,14 +100,31 @@ const AdminMembers = () => {
     setShopImageFile(null);
     setOwnerImageFile(null);
     setUploadError('');
+    setFormError('');
     setOpen(true);
   };
 
   const onSubmit = async (event) => {
     event.preventDefault();
+    setFormError('');
+    const displayOrder = Number(values.displayOrder || 0);
+    if (!Number.isInteger(displayOrder) || displayOrder < 1) {
+      setFormError('Display order must be a positive whole number.');
+      return;
+    }
+
+    const duplicate = items.find(
+      (item) => Number(item.displayOrder || 0) === displayOrder && item.id !== editing?.id
+    );
+
+    if (duplicate) {
+      setFormError(`Display order ${displayOrder} is already used by ${duplicate.shopName || `Shop ${duplicate.shopNumber || ''}`}.`);
+      return;
+    }
+
     const payload = {
       ...values,
-      displayOrder: Number(values.displayOrder || 0),
+      displayOrder,
       schedule: values.schedule || defaultSchedule()
     };
     if (editing) await updateMember(editing.id, payload);
@@ -115,7 +139,7 @@ const AdminMembers = () => {
         <h2 className="font-heading text-4xl text-text">Members</h2>
         <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] lg:min-w-[460px]">
           <Input className="min-w-0" placeholder="Search members" value={search} onChange={(event) => setSearch(event.target.value)} />
-          <Button className="w-full sm:w-auto" onClick={() => { setEditing(null); setValues(getInitialValues()); setShopImageFile(null); setOwnerImageFile(null); setUploadError(''); setOpen(true); }}>
+          <Button className="w-full sm:w-auto" onClick={() => { setEditing(null); setValues({ ...getInitialValues(), displayOrder: getNextDisplayOrder(items) }); setShopImageFile(null); setOwnerImageFile(null); setUploadError(''); setFormError(''); setOpen(true); }}>
             Add Member
           </Button>
         </div>
@@ -257,6 +281,7 @@ const AdminMembers = () => {
           </div>
           <Input label="Display Order" type="number" value={values.displayOrder} onChange={(event) => setValues((prev) => ({ ...prev, displayOrder: event.target.value }))} />
           <Select label="Status" value={values.status} onChange={(event) => setValues((prev) => ({ ...prev, status: event.target.value }))} options={Object.values(MEMBER_STATUS).map((value) => ({ label: value, value }))} />
+          {formError ? <p className="text-sm text-red-500">{formError}</p> : null}
           <div className="flex justify-end"><Button type="submit">{editing ? 'Update Member' : 'Create Member'}</Button></div>
         </form>
       </Modal>
