@@ -22,7 +22,25 @@ const registerMessagingWorker = async () => {
     appId: firebaseConfig.appId
   });
 
-  return navigator.serviceWorker.register(`${workerPath}?${params.toString()}`);
+  const registration = await navigator.serviceWorker.register(`${workerPath}?${params.toString()}`);
+
+  if (registration.active) return registration;
+
+  const installingWorker = registration.installing || registration.waiting;
+  if (installingWorker) {
+    await new Promise((resolve, reject) => {
+      const timeoutId = window.setTimeout(() => reject(new Error('Notification service worker activation timed out.')), 10000);
+
+      installingWorker.addEventListener('statechange', () => {
+        if (installingWorker.state === 'activated') {
+          window.clearTimeout(timeoutId);
+          resolve();
+        }
+      });
+    });
+  }
+
+  return navigator.serviceWorker.ready;
 };
 
 export const requestFcmToken = async () => {
