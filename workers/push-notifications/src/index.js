@@ -132,10 +132,11 @@ const savePushToken = async (env, accessToken, payload) => {
 };
 
 const verifyFirebaseUser = async (env, idToken) => {
-  if (!env.VITE_FIREBASE_API_KEY) throw new Error('Missing VITE_FIREBASE_API_KEY.');
+  const firebaseApiKey = env.VITE_FIREBASE_API_KEY || env.FIREBASE_WEB_API_KEY;
+  if (!firebaseApiKey) throw new Error('Missing VITE_FIREBASE_API_KEY.');
 
   const response = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${env.VITE_FIREBASE_API_KEY}`,
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${firebaseApiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
