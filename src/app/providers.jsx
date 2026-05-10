@@ -3,6 +3,7 @@ import { ThemeContextProvider } from '@/contexts/ThemeContext';
 import ThemeProvider from '@/components/theme/ThemeProvider';
 import { ToastProvider } from '@/components/ui/Toast';
 import PushMessageListener from '@/components/common/PushMessageListener';
+import NotificationPrompt from '@/components/common/NotificationPrompt';
 
 /** @param {{children: import('react').ReactNode}} props */
 const Providers = ({ children }) => (
@@ -11,6 +12,7 @@ const Providers = ({ children }) => (
       <AuthContextProvider>
         <ToastProvider>
           <PushMessageListener />
+          <NotificationPrompt />
           {children}
         </ToastProvider>
       </AuthContextProvider>
