@@ -14,6 +14,7 @@ import { createNotice, deleteNotice, getNotices, updateNotice } from '@/services
 import { slugify } from '@/utils/slugify';
 import { formatDate } from '@/utils/formatDate';
 import { useToast } from '@/components/ui/Toast';
+import { sendContentNotification } from '@/services/push/pushNotificationService';
 
 const initialValues = { title: '', slug: '', summary: '', content: '', status: 'draft', featured: false };
 const PAGE_SIZE = 10;
@@ -91,6 +92,16 @@ const AdminNotices = () => {
         addToast({ variant: 'success', message: 'Notice updated.' });
       } else {
         await createNotice(payload);
+        if (payload.status === 'published') {
+          await sendContentNotification({
+            type: 'notice',
+            title: 'New Notice Published',
+            body: payload.title,
+            url: `/notices/${payload.slug}`
+          }).catch((error) => {
+            addToast({ variant: 'warning', message: error.message || 'Notice created, but notification was not sent.' });
+          });
+        }
         addToast({ variant: 'success', message: 'Notice created.' });
       }
       setOpen(false);

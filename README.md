@@ -338,6 +338,51 @@ Then set:
 VITE_IMAGEKIT_AUTH_ENDPOINT=https://<your-worker>.workers.dev/api/imagekit-auth
 ```
 
+## Web Push Notifications
+
+The site supports free web push notifications with Firebase Cloud Messaging and a Cloudflare Worker sender.
+
+Notification flow:
+
+1. Visitor clicks **Enable Notifications** in the footer.
+2. The browser grants notification permission and receives an FCM token.
+3. The push Worker stores that token in Firestore under `push_tokens`.
+4. When an admin creates a published notice or a legal update, the admin UI calls the Worker.
+5. The Worker verifies the Firebase admin user and sends the notification through FCM.
+
+Required frontend `.env` values:
+
+```env
+VITE_FIREBASE_MESSAGING_VAPID_KEY=
+VITE_PUSH_WORKER_ENDPOINT=https://<your-push-worker>.workers.dev
+```
+
+Create the VAPID key in Firebase Console:
+
+```txt
+Project settings -> Cloud Messaging -> Web Push certificates
+```
+
+Push Worker location:
+
+```txt
+workers/push-notifications
+```
+
+Deploy:
+
+```bash
+cd workers/push-notifications
+npm install
+npx wrangler login
+npx wrangler secret put VITE_FIREBASE_API_KEY
+npx wrangler secret put FIREBASE_CLIENT_EMAIL
+npx wrangler secret put FIREBASE_PRIVATE_KEY
+npx wrangler deploy
+```
+
+`VITE_FIREBASE_API_KEY` is the same Firebase web API key already used by the React app. `FIREBASE_CLIENT_EMAIL` and `FIREBASE_PRIVATE_KEY` come from a Firebase service account JSON. Keep the private key only as a Worker secret.
+
 ### Docker Auth Sidecar
 
 Docker Compose includes an `auth` service that signs ImageKit uploads at:

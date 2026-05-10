@@ -13,6 +13,8 @@ import { createLegalUpdate, deleteLegalUpdate, getLegalUpdates, updateLegalUpdat
 import { slugify } from '@/utils/slugify';
 import { LEGAL_STATUS } from '@/data/constants';
 import { formatDate } from '@/utils/formatDate';
+import { useToast } from '@/components/ui/Toast';
+import { sendContentNotification } from '@/services/push/pushNotificationService';
 
 const initialValues = {
   title: '',
@@ -27,6 +29,7 @@ const initialValues = {
 const PAGE_SIZE = 10;
 
 const AdminLegalUpdates = () => {
+  const { addToast } = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setOpen] = useState(false);
@@ -72,7 +75,17 @@ const AdminLegalUpdates = () => {
     };
 
     if (editing) await updateLegalUpdate(editing.id, payload);
-    else await createLegalUpdate(payload);
+    else {
+      await createLegalUpdate(payload);
+      await sendContentNotification({
+        type: 'legal_update',
+        title: 'New Legal Update',
+        body: payload.title,
+        url: `/legal-updates/${payload.slug}`
+      }).catch((error) => {
+        addToast({ variant: 'warning', message: error.message || 'Legal update created, but notification was not sent.' });
+      });
+    }
     setOpen(false);
     setEditing(null);
     setValues(initialValues);

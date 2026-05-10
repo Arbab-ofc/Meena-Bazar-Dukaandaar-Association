@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { ChevronRight, Mail, MapPin, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import NotificationOptIn from '@/components/common/NotificationOptIn';
 
 const links = [
   ['Home', '/'],
@@ -80,6 +81,9 @@ const Footer = () => (
         <div className="rounded-[var(--radius)] border border-border bg-bg-elevated px-3 py-2 shadow-sm">
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gold">Business Hours</p>
           <p className="mt-1 text-xs text-text-muted sm:whitespace-nowrap">Monday to Saturday, 10:00 AM to 7:00 PM</p>
+        </div>
+        <div className="mt-4">
+          <NotificationOptIn compact />
         </div>
       </div>
     </div>

@@ -1,0 +1,8 @@
+name = "meena-bazar-push-notifications"
+main = "src/index.js"
+compatibility_date = "2025-05-04"
+workers_dev = true
+
+[vars]
+FIREBASE_PROJECT_ID = "meena-bazar-association"
+SITE_URL = "https://meena-bazar-association.web.app"
