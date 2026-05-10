@@ -50,7 +50,7 @@ const NotificationOptIn = ({ compact = false, className = '', onSubscribed }) =>
       onClick={onEnable}
       className={`${compact ? 'w-full justify-start' : ''} ${className}`}
     >
-      Enable Notifications
+      Enable
     </Button>
   );
 };
